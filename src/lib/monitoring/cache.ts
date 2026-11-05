@@ -22,7 +22,7 @@ export function getCached<T>(key: string): CachedResult<T> | null {
   return {
     data: entry.value,
     fetchedAt: new Date(entry.fetchedAt).toISOString(),
-    stale: now > entry.expiresAt,
+    stale: now >= entry.expiresAt,
     fromCache: true,
   };
 }
