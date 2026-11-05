@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
-import { assertDashboardAuthorized, monitoringErrorResponse } from '@/lib/security/api-auth';
+import {
+  assertDashboardAuthorized,
+  assertMonitoringReady,
+  monitoringErrorResponse,
+} from '@/lib/security/api-auth';
 import { collectEc2WithMeta } from '@/services/monitoring/monitoring-orchestrator.service';
 
 export const dynamic = 'force-dynamic';
@@ -9,6 +13,11 @@ export async function GET(request: Request): Promise<NextResponse> {
   const unauthorized = assertDashboardAuthorized(request);
   if (unauthorized) {
     return unauthorized;
+  }
+
+  const notReady = assertMonitoringReady();
+  if (notReady) {
+    return notReady;
   }
 
   try {

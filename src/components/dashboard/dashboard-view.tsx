@@ -125,9 +125,23 @@ export function DashboardView(): ReactNode {
               Last refresh: <strong>{formatDateTime(lastRefresh)}</strong>
             </span>
             <span>Auto refresh: every 45 seconds</span>
-            {error ? <span className="text-rose-600 dark:text-rose-300">Error: {error}</span> : null}
           </div>
         </div>
+
+        {error ? (
+          <div className="rounded-2xl border border-rose-500/40 bg-rose-950/40 p-4 text-sm text-rose-100 dark:bg-rose-950/60">
+            <p className="font-medium text-rose-200">Monitoring error</p>
+            <p className="mt-2 whitespace-pre-wrap text-rose-100/95">{error}</p>
+            {error.includes('AWS credentials') ? (
+              <p className="mt-3 text-rose-200/90">
+                Vercel: Project → Settings → Environment Variables → add{' '}
+                <code className="rounded bg-black/20 px-1">AWS_ACCESS_KEY_ID</code>,{' '}
+                <code className="rounded bg-black/20 px-1">AWS_SECRET_ACCESS_KEY</code>, and{' '}
+                <code className="rounded bg-black/20 px-1">AWS_REGION</code>, then Redeploy.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
         {loading && !overview ? (
           <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center dark:border-slate-700">

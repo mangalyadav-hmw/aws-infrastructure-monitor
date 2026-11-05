@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { assertAwsCredentialsConfigured, normalizeAwsErrorMessage } from '@/lib/aws-client/credentials';
 import { getEnv } from '@/lib/config/env';
 
 export function assertDashboardAuthorized(request: Request): NextResponse | null {
@@ -16,12 +17,22 @@ export function assertDashboardAuthorized(request: Request): NextResponse | null
 }
 
 export function monitoringErrorResponse(error: unknown, fallbackMessage: string): NextResponse {
-  const message = error instanceof Error ? error.message : fallbackMessage;
+  const message = normalizeAwsErrorMessage(error) || fallbackMessage;
+  const status = message.includes('AWS credentials') ? 503 : 502;
   return NextResponse.json(
     {
       error: message,
       checkedAt: new Date().toISOString(),
     },
-    { status: 502 },
+    { status },
   );
+}
+
+export function assertMonitoringReady(): NextResponse | null {
+  try {
+    assertAwsCredentialsConfigured();
+    return null;
+  } catch (error) {
+    return monitoringErrorResponse(error, 'Monitoring is not configured');
+  }
 }
